@@ -1,0 +1,1102 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>NeuroLearn · Aprende con IA</title>
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500&display=swap" rel="stylesheet" />
+
+  <style>
+    /* =============================================
+       TOKENS & RESET
+       ============================================= */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      /* Palette */
+      --bg:        #0d0f14;
+      --surface:   #161b24;
+      --card:      #1e2535;
+      --border:    #2a3248;
+      --accent:    #6c63ff;
+      --accent2:   #00e5c3;
+      --danger:    #ff4f6d;
+      --warn:      #f5a623;
+      --text:      #e8eaf0;
+      --muted:     #7a839e;
+      --correct:   #22d67a;
+      --incorrect: #ff4f6d;
+
+      /* Type */
+      --font-display: 'Space Grotesk', sans-serif;
+      --font-body:    'Inter', sans-serif;
+    }
+
+    html, body {
+      min-height: 100%;
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--font-body);
+      font-size: 16px;
+      line-height: 1.6;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* =============================================
+       LAYOUT SHELL
+       ============================================= */
+    #app {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 1.5rem 1rem;
+    }
+
+    .screen {
+      width: 100%;
+      max-width: 560px;
+      display: flex;
+      flex-direction: column;
+      gap: 1.25rem;
+      animation: fadeUp .35s ease both;
+    }
+
+    .screen.hidden { display: none; }
+
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(18px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    /* =============================================
+       LOGO / BRAND
+       ============================================= */
+    .brand {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: .5rem;
+      padding: 2.5rem 0 1rem;
+    }
+
+    .brand-icon {
+      width: 72px; height: 72px;
+      border-radius: 22px;
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      display: flex; align-items: center; justify-content: center;
+      font-size: 2rem;
+      box-shadow: 0 0 32px rgba(108,99,255,.45);
+    }
+
+    .brand-name {
+      font-family: var(--font-display);
+      font-size: 2rem;
+      font-weight: 700;
+      letter-spacing: -.03em;
+      background: linear-gradient(90deg, var(--accent), var(--accent2));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .brand-sub {
+      color: var(--muted);
+      font-size: .9rem;
+      letter-spacing: .04em;
+      text-transform: uppercase;
+    }
+
+    /* =============================================
+       CARDS
+       ============================================= */
+    .card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 1.75rem;
+      box-shadow: 0 4px 24px rgba(0,0,0,.35);
+    }
+
+    .card-label {
+      font-size: .72rem;
+      font-weight: 600;
+      letter-spacing: .12em;
+      text-transform: uppercase;
+      color: var(--accent);
+      margin-bottom: .6rem;
+    }
+
+    /* =============================================
+       FORM ELEMENTS
+       ============================================= */
+    label {
+      display: block;
+      font-family: var(--font-display);
+      font-size: 1.3rem;
+      font-weight: 600;
+      margin-bottom: 1rem;
+      color: var(--text);
+    }
+
+    input[type="text"], textarea {
+      width: 100%;
+      background: var(--surface);
+      border: 1.5px solid var(--border);
+      border-radius: 14px;
+      padding: .85rem 1.1rem;
+      font-family: var(--font-body);
+      font-size: 1rem;
+      color: var(--text);
+      outline: none;
+      transition: border-color .2s, box-shadow .2s;
+      resize: vertical;
+    }
+
+    input[type="text"]::placeholder,
+    textarea::placeholder { color: var(--muted); }
+
+    input[type="text"]:focus,
+    textarea:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px rgba(108,99,255,.2);
+    }
+
+    /* =============================================
+       BUTTONS
+       ============================================= */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: .5rem;
+      padding: .9rem 1.6rem;
+      border: none;
+      border-radius: 14px;
+      font-family: var(--font-display);
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: transform .15s, box-shadow .15s, opacity .15s;
+      text-decoration: none;
+      width: 100%;
+    }
+
+    .btn:active { transform: scale(.97); }
+
+    .btn-primary {
+      background: linear-gradient(135deg, var(--accent), #9c95ff);
+      color: #fff;
+      box-shadow: 0 4px 20px rgba(108,99,255,.4);
+    }
+    .btn-primary:hover { box-shadow: 0 6px 28px rgba(108,99,255,.55); }
+
+    .btn-secondary {
+      background: var(--surface);
+      color: var(--text);
+      border: 1.5px solid var(--border);
+    }
+    .btn-secondary:hover { border-color: var(--accent); color: var(--accent); }
+
+    .btn-correct {
+      background: linear-gradient(135deg, #1a9e58, var(--correct));
+      color: #fff;
+      box-shadow: 0 4px 20px rgba(34,214,122,.3);
+    }
+
+    .btn:disabled { opacity: .45; pointer-events: none; }
+
+    /* =============================================
+       HUD (stats bar)
+       ============================================= */
+    .hud {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: .75rem;
+    }
+
+    .hud-stat {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: .75rem .6rem;
+      text-align: center;
+    }
+
+    .hud-val {
+      font-family: var(--font-display);
+      font-size: 1.3rem;
+      font-weight: 700;
+      line-height: 1;
+    }
+
+    .hud-key {
+      font-size: .67rem;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: .07em;
+      margin-top: .25rem;
+    }
+
+    /* =============================================
+       PROGRESS BAR
+       ============================================= */
+    .progress-wrap {
+      display: flex;
+      flex-direction: column;
+      gap: .4rem;
+    }
+
+    .progress-meta {
+      display: flex;
+      justify-content: space-between;
+      font-size: .8rem;
+      color: var(--muted);
+    }
+
+    .progress-track {
+      height: 10px;
+      background: var(--surface);
+      border-radius: 99px;
+      overflow: hidden;
+      border: 1px solid var(--border);
+    }
+
+    .progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg, var(--accent), var(--accent2));
+      border-radius: 99px;
+      transition: width .6s cubic-bezier(.34,1.56,.64,1);
+    }
+
+    /* =============================================
+       QUESTION CARD
+       ============================================= */
+    .question-text {
+      font-family: var(--font-display);
+      font-size: 1.2rem;
+      font-weight: 600;
+      line-height: 1.5;
+      color: var(--text);
+      margin-bottom: 1.25rem;
+    }
+
+    /* =============================================
+       FEEDBACK PANEL
+       ============================================= */
+    .feedback {
+      border-radius: 16px;
+      padding: 1.25rem 1.4rem;
+      display: none;
+      gap: .75rem;
+      flex-direction: column;
+      animation: fadeUp .3s ease both;
+    }
+
+    .feedback.show { display: flex; }
+
+    .feedback.correct {
+      background: rgba(34,214,122,.1);
+      border: 1.5px solid rgba(34,214,122,.35);
+    }
+
+    .feedback.partial {
+      background: rgba(245,166,35,.08);
+      border: 1.5px solid rgba(245,166,35,.35);
+    }
+
+    .feedback.incorrect {
+      background: rgba(255,79,109,.1);
+      border: 1.5px solid rgba(255,79,109,.35);
+    }
+
+    .feedback-title {
+      font-family: var(--font-display);
+      font-size: 1.05rem;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: .5rem;
+    }
+
+    .feedback.correct   .feedback-title { color: var(--correct); }
+    .feedback.partial   .feedback-title { color: var(--warn); }
+    .feedback.incorrect .feedback-title { color: var(--incorrect); }
+
+    /* Confidence bar */
+    .confidence-wrap {
+      display: flex;
+      align-items: center;
+      gap: .6rem;
+      margin-top: .25rem;
+    }
+
+    .confidence-label {
+      font-size: .72rem;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: .07em;
+      white-space: nowrap;
+    }
+
+    .confidence-track {
+      flex: 1;
+      height: 6px;
+      background: var(--surface);
+      border-radius: 99px;
+      overflow: hidden;
+      border: 1px solid var(--border);
+    }
+
+    .confidence-fill {
+      height: 100%;
+      border-radius: 99px;
+      transition: width .6s cubic-bezier(.34,1.56,.64,1);
+    }
+
+    .feedback.correct   .confidence-fill { background: var(--correct); }
+    .feedback.partial   .confidence-fill { background: var(--warn); }
+    .feedback.incorrect .confidence-fill { background: var(--incorrect); }
+
+    .confidence-pct {
+      font-size: .75rem;
+      font-weight: 600;
+      font-family: var(--font-display);
+      min-width: 2.5rem;
+      text-align: right;
+    }
+
+    .feedback.correct   .confidence-pct { color: var(--correct); }
+    .feedback.partial   .confidence-pct { color: var(--warn); }
+    .feedback.incorrect .confidence-pct { color: var(--incorrect); }
+
+    .feedback-body { font-size: .9rem; color: var(--text); line-height: 1.6; }
+
+    /* XP pill animation */
+    .xp-pill {
+      display: inline-flex;
+      align-items: center;
+      background: rgba(0,229,195,.12);
+      border: 1px solid rgba(0,229,195,.3);
+      color: var(--accent2);
+      font-family: var(--font-display);
+      font-size: .85rem;
+      font-weight: 600;
+      padding: .25rem .75rem;
+      border-radius: 99px;
+      gap: .3rem;
+    }
+
+    /* =============================================
+       HISTORY
+       ============================================= */
+    .history-title {
+      font-family: var(--font-display);
+      font-size: 1rem;
+      font-weight: 600;
+      color: var(--muted);
+      margin-bottom: .75rem;
+      display: flex;
+      align-items: center;
+      gap: .4rem;
+    }
+
+    .history-list {
+      display: flex;
+      flex-direction: column;
+      gap: .5rem;
+      max-height: 240px;
+      overflow-y: auto;
+      padding-right: .2rem;
+    }
+
+    .history-list::-webkit-scrollbar { width: 4px; }
+    .history-list::-webkit-scrollbar-track { background: transparent; }
+    .history-list::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+
+    .history-item {
+      display: flex;
+      gap: .6rem;
+      align-items: flex-start;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: .65rem .9rem;
+      font-size: .82rem;
+      line-height: 1.4;
+    }
+
+    .history-dot {
+      width: 8px; height: 8px;
+      border-radius: 50%;
+      margin-top: .3rem;
+      flex-shrink: 0;
+    }
+
+    .history-dot.ok      { background: var(--correct); }
+    .history-dot.partial { background: var(--warn); }
+    .history-dot.bad     { background: var(--incorrect); }
+
+    .history-q { color: var(--muted); }
+    .history-a { color: var(--text); font-weight: 500; }
+
+    /* =============================================
+       LOADER OVERLAY
+       ============================================= */
+    #loader {
+      position: fixed;
+      inset: 0;
+      background: rgba(13,15,20,.85);
+      backdrop-filter: blur(6px);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 1rem;
+      z-index: 999;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity .25s;
+    }
+
+    #loader.show { opacity: 1; pointer-events: all; }
+
+    .spinner {
+      width: 44px; height: 44px;
+      border: 3px solid var(--border);
+      border-top-color: var(--accent);
+      border-radius: 50%;
+      animation: spin .75s linear infinite;
+    }
+
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    .loader-text {
+      font-family: var(--font-display);
+      font-size: .95rem;
+      color: var(--muted);
+    }
+
+    /* =============================================
+       ERROR TOAST
+       ============================================= */
+    #toast {
+      position: fixed;
+      bottom: 1.5rem;
+      left: 50%;
+      transform: translateX(-50%) translateY(80px);
+      background: var(--danger);
+      color: #fff;
+      font-family: var(--font-display);
+      font-size: .9rem;
+      font-weight: 600;
+      padding: .75rem 1.4rem;
+      border-radius: 99px;
+      box-shadow: 0 6px 20px rgba(255,79,109,.4);
+      transition: transform .3s ease, opacity .3s;
+      opacity: 0;
+      white-space: nowrap;
+      z-index: 1000;
+    }
+
+    #toast.show { transform: translateX(-50%) translateY(0); opacity: 1; }
+
+    /* =============================================
+       TOPIC CHIP
+       ============================================= */
+    .topic-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: .4rem;
+      background: rgba(108,99,255,.15);
+      border: 1px solid rgba(108,99,255,.3);
+      color: var(--accent);
+      font-size: .8rem;
+      font-weight: 600;
+      padding: .3rem .85rem;
+      border-radius: 99px;
+      text-transform: uppercase;
+      letter-spacing: .06em;
+    }
+
+    /* =============================================
+       LEVEL BADGE
+       ============================================= */
+    .level-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: .35rem;
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      color: #fff;
+      font-family: var(--font-display);
+      font-size: .85rem;
+      font-weight: 700;
+      padding: .3rem .9rem;
+      border-radius: 99px;
+      box-shadow: 0 2px 12px rgba(108,99,255,.4);
+    }
+
+    /* =============================================
+       EXAMPLES GRID (home screen)
+       ============================================= */
+    .examples {
+      display: flex;
+      flex-wrap: wrap;
+      gap: .5rem;
+      margin-top: .75rem;
+    }
+
+    .example-chip {
+      background: var(--surface);
+      border: 1.5px solid var(--border);
+      color: var(--muted);
+      font-size: .82rem;
+      padding: .35rem .85rem;
+      border-radius: 99px;
+      cursor: pointer;
+      transition: border-color .15s, color .15s;
+    }
+
+    .example-chip:hover { border-color: var(--accent); color: var(--accent); }
+
+    /* =============================================
+       RESPONSIVE
+       ============================================= */
+    @media (max-width: 480px) {
+      .hud { grid-template-columns: repeat(2, 1fr); }
+      .brand-name { font-size: 1.65rem; }
+    }
+
+    /* =============================================
+       UTILITY
+       ============================================= */
+    .flex-row { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: .5rem; }
+    .gap-sm    { gap: .5rem; }
+    .mt-sm     { margin-top: .5rem; }
+    .mt-md     { margin-top: 1rem; }
+  </style>
+</head>
+<body>
+
+<!-- LOADER OVERLAY -->
+<div id="loader">
+  <div class="spinner"></div>
+  <p class="loader-text" id="loaderText">Pensando…</p>
+</div>
+
+<!-- ERROR TOAST -->
+<div id="toast"></div>
+
+<div id="app">
+
+  <!-- =============================================
+       SCREEN 1 · HOME
+       ============================================= -->
+  <div id="screenHome" class="screen">
+
+    <div class="brand">
+      <div class="brand-icon">🧠</div>
+      <div class="brand-name">NeuroLearn</div>
+      <div class="brand-sub">Tu profesor de IA personal</div>
+    </div>
+
+    <div class="card">
+      <div class="card-label">Elige tu tema</div>
+      <label for="topicInput">¿Qué te gustaría aprender hoy?</label>
+      <input
+        type="text"
+        id="topicInput"
+        placeholder="Ej. Electricidad, Historia, Python…"
+        maxlength="80"
+        autocomplete="off"
+      />
+
+      <div class="examples">
+        <!-- Example chips for quick selection -->
+        <span class="example-chip" onclick="pickTopic('Electricidad')">⚡ Electricidad</span>
+        <span class="example-chip" onclick="pickTopic('Matemáticas')">📐 Matemáticas</span>
+        <span class="example-chip" onclick="pickTopic('Programación')">💻 Programación</span>
+        <span class="example-chip" onclick="pickTopic('Biología')">🧬 Biología</span>
+        <span class="example-chip" onclick="pickTopic('Historia')">🏛️ Historia</span>
+        <span class="example-chip" onclick="pickTopic('Inglés')">🌍 Inglés</span>
+        <span class="example-chip" onclick="pickTopic('Física')">🔭 Física</span>
+        <span class="example-chip" onclick="pickTopic('IA')">🤖 Inteligencia Artificial</span>
+      </div>
+
+      <button class="btn btn-primary mt-md" id="btnStart" onclick="startLearning()">
+        Comenzar →
+      </button>
+    </div>
+
+  </div><!-- /screenHome -->
+
+
+  <!-- =============================================
+       SCREEN 2 · LEARN
+       ============================================= -->
+  <div id="screenLearn" class="screen hidden">
+
+    <!-- HUD -->
+    <div class="flex-row">
+      <span id="topicChip" class="topic-chip">📖 Tema</span>
+      <span id="levelBadge" class="level-badge">⚡ Nivel 1</span>
+    </div>
+
+    <!-- Progress -->
+    <div class="card" style="padding:1.25rem 1.5rem;">
+      <div class="progress-wrap">
+        <div class="progress-meta">
+          <span id="xpLabel">0 XP</span>
+          <span id="xpNextLabel">Siguiente nivel: 100 XP</span>
+        </div>
+        <div class="progress-track">
+          <div class="progress-fill" id="progressBar" style="width:0%"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Stats -->
+    <div class="hud">
+      <div class="hud-stat">
+        <div class="hud-val" id="statCorrect" style="color:var(--correct)">0</div>
+        <div class="hud-key">Correctas</div>
+      </div>
+      <div class="hud-stat">
+        <div class="hud-val" id="statWrong" style="color:var(--incorrect)">0</div>
+        <div class="hud-key">Incorrectas</div>
+      </div>
+      <div class="hud-stat">
+        <div class="hud-val" id="statXP" style="color:var(--accent2)">0</div>
+        <div class="hud-key">XP Total</div>
+      </div>
+      <div class="hud-stat">
+        <div class="hud-val" id="statStreak" style="color:var(--warn)">0🔥</div>
+        <div class="hud-key">Racha</div>
+      </div>
+    </div>
+
+    <!-- Question Card -->
+    <div class="card">
+      <div class="card-label">Pregunta</div>
+      <p class="question-text" id="questionText">Cargando pregunta…</p>
+
+      <textarea
+        id="answerInput"
+        rows="3"
+        placeholder="Escribe tu respuesta aquí…"
+        oninput="checkAnswerReady()"
+      ></textarea>
+
+      <button class="btn btn-primary mt-md" id="btnAnswer" onclick="submitAnswer()" disabled>
+        Responder ✓
+      </button>
+    </div>
+
+    <!-- Feedback -->
+    <div class="feedback" id="feedbackPanel">
+      <div class="feedback-title" id="feedbackTitle"></div>
+      <p class="feedback-body" id="feedbackBody"></p>
+      <div class="confidence-wrap" id="confidenceWrap" style="display:none;">
+        <span class="confidence-label">Confianza</span>
+        <div class="confidence-track">
+          <div class="confidence-fill" id="confidenceFill" style="width:0%"></div>
+        </div>
+        <span class="confidence-pct" id="confidencePct">0%</span>
+      </div>
+      <div id="xpEarned"></div>
+    </div>
+
+    <!-- Next / Reset buttons (hidden until feedback shown) -->
+    <div id="actionButtons" style="display:none; flex-direction:column; gap:.75rem;">
+      <button class="btn btn-primary" id="btnNext" onclick="nextQuestion()">
+        Siguiente pregunta →
+      </button>
+      <button class="btn btn-secondary" onclick="resetApp()">
+        Cambiar tema
+      </button>
+    </div>
+
+    <!-- History -->
+    <div class="card" id="historySection" style="display:none;">
+      <div class="history-title">📋 Historial de respuestas</div>
+      <div class="history-list" id="historyList"></div>
+    </div>
+
+  </div><!-- /screenLearn -->
+
+</div><!-- /app -->
+
+
+<script>
+  /* ================================================
+     API CONFIG
+  ================================================ */
+  const API_BASE   = 'https://morning-block-e23a.jesus29032011.workers.dev';
+  const EP_GENERAR = `${API_BASE}/generar`;
+  const EP_EVALUAR = `${API_BASE}/evaluar`;
+
+  /* ================================================
+     STATE
+  ================================================ */
+  let state = {
+    topic:       '',    // Tema elegido
+    level:       1,     // Nivel actual (1–5)
+    xp:          0,     // Experiencia acumulada
+    xpThreshold: 100,   // XP para subir de nivel
+    correct:     0,     // Respuestas correctas
+    partial:     0,     // Respuestas parciales
+    wrong:       0,     // Respuestas incorrectas
+    streak:      0,     // Racha actual
+    question:    '',    // Pregunta activa
+    history:     [],    // Historial [{q, a, resultado}]
+  };
+
+  /* ================================================
+     XP TABLE  (por nivel)
+  ================================================ */
+  const XP_PER_CORRECT = [20, 30, 40, 55, 75]; // índice = nivel-1
+
+  /* ================================================
+     SAFE JSON PARSER
+     Gemini sometimes wraps JSON in ```json ... ``` markdown fences.
+     This function strips them before parsing.
+  ================================================ */
+  function safeParseJSON(text) {
+    // Remove markdown code fences: ```json ... ``` or ``` ... ```
+    let clean = text.trim();
+    clean = clean.replace(/^```(?:json)?\s*/i, '').replace(/\s*```$/, '').trim();
+    return JSON.parse(clean);
+  }
+
+  /* ================================================
+     DOM HELPERS
+  ================================================ */
+  const $  = id => document.getElementById(id);
+  const screenHome  = $('screenHome');
+  const screenLearn = $('screenLearn');
+
+  function showLoader(msg = 'Pensando…') {
+    $('loaderText').textContent = msg;
+    $('loader').classList.add('show');
+  }
+
+  function hideLoader() {
+    $('loader').classList.remove('show');
+  }
+
+  let toastTimer;
+  function showToast(msg) {
+    const t = $('toast');
+    t.textContent = msg;
+    t.classList.add('show');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => t.classList.remove('show'), 3500);
+  }
+
+  /* ================================================
+     HOME SCREEN LOGIC
+  ================================================ */
+
+  /** Fill input with an example topic */
+  function pickTopic(topic) {
+    $('topicInput').value = topic;
+    $('topicInput').focus();
+  }
+
+  /** Start learning session */
+  async function startLearning() {
+    const raw = $('topicInput').value.trim();
+    if (!raw) {
+      showToast('⚠️ Escribe un tema primero');
+      return;
+    }
+
+    // Reset state
+    state = {
+      topic:       raw,
+      level:       1,
+      xp:          0,
+      xpThreshold: 100,
+      correct:     0,
+      partial:     0,
+      wrong:       0,
+      streak:      0,
+      question:    '',
+      history:     [],
+    };
+
+    // Switch screen
+    screenHome.classList.add('hidden');
+    screenLearn.classList.remove('hidden');
+
+    // Update topic chip
+    $('topicChip').textContent = `📖 ${state.topic}`;
+
+    updateHUD();
+    await loadQuestion();
+  }
+
+  /* ================================================
+     QUESTION LOGIC
+  ================================================ */
+
+  /** Fetch a new question from the API */
+  async function loadQuestion() {
+    // Reset UI
+    $('feedbackPanel').className  = 'feedback';
+    $('feedbackPanel').classList.remove('show');
+    $('confidenceWrap').style.display = 'none';
+    $('confidenceFill').style.width   = '0%';
+    $('actionButtons').style.display = 'none';
+    $('answerInput').value    = '';
+    $('answerInput').disabled  = false;
+    $('btnAnswer').disabled    = true;
+    $('questionText').textContent = 'Cargando pregunta…';
+
+    showLoader('Generando pregunta…');
+
+    try {
+      const res = await fetch(EP_GENERAR, {
+        method:  'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body:    JSON.stringify({ tema: state.topic, nivel: state.level }),
+      });
+
+      if (!res.ok) throw new Error(`Error del servidor (${res.status})`);
+
+      // Use text() first so we can clean markdown fences Gemini may add
+      const raw  = await res.text();
+      const data = safeParseJSON(raw);
+
+      if (!data.pregunta) throw new Error('Respuesta inesperada de la API');
+
+      state.question = data.pregunta;
+      $('questionText').textContent = data.pregunta;
+
+    } catch (err) {
+      $('questionText').textContent = 'No se pudo cargar la pregunta.';
+      showToast('❌ ' + err.message);
+    } finally {
+      hideLoader();
+    }
+  }
+
+  /** Enable answer button only when textarea has content */
+  function checkAnswerReady() {
+    $('btnAnswer').disabled = $('answerInput').value.trim().length === 0;
+  }
+
+  /** Submit answer to evaluation endpoint */
+  async function submitAnswer() {
+    const answer = $('answerInput').value.trim();
+    if (!answer) return;
+
+    $('btnAnswer').disabled   = true;
+    $('answerInput').disabled = true;
+
+    showLoader('Evaluando respuesta…');
+
+    try {
+      const res = await fetch(EP_EVALUAR, {
+        method:  'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body:    JSON.stringify({ pregunta: state.question, respuesta: answer }),
+      });
+
+      if (!res.ok) throw new Error(`Error del servidor (${res.status})`);
+
+      // Use text() first so we can clean markdown fences Gemini may add
+      const raw  = await res.text();
+      const data = safeParseJSON(raw);
+
+      if (typeof data.resultado === 'undefined') throw new Error('Respuesta inesperada');
+
+      showFeedback(data.resultado, data.explicacion || '', data.confianza ?? 1, answer);
+
+    } catch (err) {
+      showToast('❌ ' + err.message);
+      $('btnAnswer').disabled   = false;
+      $('answerInput').disabled = false;
+    } finally {
+      hideLoader();
+    }
+  }
+
+  /* ================================================
+     FEEDBACK & XP
+  ================================================ */
+
+  function showFeedback(resultado, explanation, confianza, userAnswer) {
+    const panel = $('feedbackPanel');
+
+    // — Confidence bar —
+    const pctVal = Math.round(confianza * 100);
+    $('confidenceFill').style.width = pctVal + '%';
+    $('confidencePct').textContent  = pctVal + '%';
+    $('confidenceWrap').style.display = 'flex';
+
+    if (resultado === 'correcto') {
+      const earned = XP_PER_CORRECT[Math.min(state.level - 1, 4)];
+      state.xp      += earned;
+      state.correct += 1;
+      state.streak  += 1;
+
+      const bonus = state.streak >= 3 ? Math.round(earned * 0.5) : 0;
+      if (bonus) state.xp += bonus;
+
+      let leveledUp = false;
+      while (state.xp >= state.xpThreshold && state.level < 5) {
+        state.xp          -= state.xpThreshold;
+        state.level       += 1;
+        state.xpThreshold  = Math.round(state.xpThreshold * 1.5);
+        leveledUp = true;
+      }
+
+      panel.className = 'feedback show correct';
+      $('feedbackTitle').textContent = leveledUp
+        ? '🎉 ¡Correcto! ¡Subiste de nivel!'
+        : '✅ ¡Correcto!';
+      $('feedbackBody').textContent = explanation;
+      $('xpEarned').innerHTML =
+        `<span class="xp-pill">+${earned + bonus} XP${bonus ? ` (+${bonus} racha 🔥)` : ''}</span>`;
+      $('btnNext').className = leveledUp ? 'btn btn-correct' : 'btn btn-primary';
+
+    } else if (resultado === 'parcial') {
+      // XP parcial = la mitad del nivel
+      const earned = Math.round(XP_PER_CORRECT[Math.min(state.level - 1, 4)] * 0.5);
+      state.xp      += earned;
+      state.partial += 1;
+      state.streak   = 0; // parcial no mantiene racha
+
+      panel.className = 'feedback show partial';
+      $('feedbackTitle').textContent = '🟡 Respuesta parcial';
+      $('feedbackBody').textContent  = explanation;
+      $('xpEarned').innerHTML =
+        `<span class="xp-pill" style="background:rgba(245,166,35,.12);border-color:rgba(245,166,35,.3);color:var(--warn)">+${earned} XP</span>`;
+      $('btnNext').className = 'btn btn-primary';
+
+    } else {
+      state.wrong  += 1;
+      state.streak  = 0;
+
+      panel.className = 'feedback show incorrect';
+      $('feedbackTitle').textContent = '❌ Incorrecto';
+      $('feedbackBody').textContent  = explanation;
+      $('xpEarned').innerHTML = '';
+      $('btnNext').className = 'btn btn-primary';
+    }
+
+    // Save to history
+    state.history.unshift({ q: state.question, a: userAnswer, resultado });
+
+    updateHUD();
+    updateHistory();
+
+    $('actionButtons').style.display = 'flex';
+    $('actionButtons').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  }
+
+  /* ================================================
+     HUD UPDATE
+  ================================================ */
+
+  function updateHUD() {
+    // Level badge
+    $('levelBadge').textContent = `⚡ Nivel ${state.level}`;
+
+    // Stats
+    $('statCorrect').textContent = state.correct;
+    $('statWrong').textContent   = state.wrong;
+    $('statXP').textContent      = state.xp;
+    $('statStreak').textContent  = `${state.streak}🔥`;
+
+    // Progress bar
+    const pct = Math.min((state.xp / state.xpThreshold) * 100, 100);
+    $('progressBar').style.width   = pct + '%';
+    $('xpLabel').textContent       = `${state.xp} XP`;
+    $('xpNextLabel').textContent   = state.level < 5
+      ? `Siguiente nivel: ${state.xpThreshold} XP`
+      : '¡Nivel máximo alcanzado! 🏆';
+  }
+
+  /* ================================================
+     HISTORY
+  ================================================ */
+
+  function updateHistory() {
+    if (state.history.length === 0) return;
+
+    $('historySection').style.display = 'block';
+
+    const list = $('historyList');
+    list.innerHTML = state.history.slice(0, 20).map(item => `
+      <div class="history-item">
+        <div class="history-dot ${item.resultado === 'correcto' ? 'ok' : item.resultado === 'parcial' ? 'partial' : 'bad'}"></div>
+        <div>
+          <div class="history-q">${escapeHtml(item.q)}</div>
+          <div class="history-a">→ ${escapeHtml(item.a)}</div>
+        </div>
+      </div>
+    `).join('');
+  }
+
+  /* ================================================
+     NAVIGATION
+  ================================================ */
+
+  /** Request the next question */
+  async function nextQuestion() {
+    await loadQuestion();
+  }
+
+  /** Return to home screen and reset everything */
+  function resetApp() {
+    screenLearn.classList.add('hidden');
+    screenHome.classList.remove('hidden');
+    $('topicInput').value = '';
+    $('historySection').style.display = 'none';
+    screenHome.classList.remove('hidden');
+    // Trigger re-animation
+    screenHome.style.animation = 'none';
+    requestAnimationFrame(() => {
+      screenHome.style.animation = '';
+    });
+  }
+
+  /* ================================================
+     UTILITIES
+  ================================================ */
+
+  function escapeHtml(str) {
+    return str
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;');
+  }
+
+  /* ================================================
+     KEYBOARD SHORTCUTS
+  ================================================ */
+
+  document.addEventListener('keydown', e => {
+    // Enter on home → start
+    if (e.key === 'Enter' && !screenHome.classList.contains('hidden')) {
+      startLearning();
+    }
+    // Ctrl+Enter → submit answer
+    if (e.key === 'Enter' && e.ctrlKey && !screenLearn.classList.contains('hidden')) {
+      submitAnswer();
+    }
+  });
+
+  // Auto-focus topic input on load
+  window.addEventListener('load', () => $('topicInput').focus());
+
+</script>
+</body>
+</html>
